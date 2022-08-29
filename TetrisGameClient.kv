@@ -1,0 +1,206 @@
+#:set LIGHT_BLUE [0, 0.8, 0.9, 1]
+#:set WHITE [1, 1, 1, 1]
+#:set BLACK [0, 0, 0, 1]
+#:set RED [1, 0, 0, 1]
+
+<Widget>:
+    font_name: "assets/font3.otf"
+    color: BLACK
+
+<Label>:
+    color: LIGHT_BLUE
+
+<Button>:
+    background_normal: 'assets/blue.png'
+    color: BLACK
+
+<TextInput>:
+    font_size: '20sp'
+
+<GameField>:
+    orientation: 'vertical'
+    size_hint_y: None
+    BoxLayout:
+        canvas.before:
+            Color:
+                rgba: LIGHT_BLUE if not root.game_over else RED
+            Line:
+                width: 1
+                rectangle: self.x, self.y, self.width, self.height
+        size_hint_y: None
+        height: '100dp'
+        orientation: 'horizontal'
+        id: top_bar
+        Label:
+            id: score_label
+            font_name: "assets/font2.ttf"
+            font_size: '50sp'
+            text: "Score  " + str(root.score)
+
+    GridLayout:
+        canvas.before:
+            Color:
+                rgba:  LIGHT_BLUE if not root.game_over else RED
+            Line:
+                width: 1
+                rectangle: self.x, self.y, self.width, self.height
+        id: field_grid
+
+
+<FirebaseLoginPopup>
+    title: root.mode
+    BoxLayout:
+        orientation: 'vertical'
+        id: root_box
+
+<LobbyRow>
+    size_hint_y: None
+    height: "50dp"
+    Label:
+        id: name_label
+        text: root.game_lobby.lobby_name
+        text_size: (self.width-20, None)
+    Label:
+        id: players_label
+        text: str(root.number_of_players) + " Players"
+        text_size: (self.width-20, None)
+    Button:
+        size_hint_x: None
+        width: '100dp'
+        id: join_btn
+        text: "Join"
+        on_press: root.on_join()
+
+<LobbyPopup>:
+    title: "Join Lobby" #+ root.app_root.player.firebase_info.displayName if root.app_root.player.logged_in else ""
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 10
+        BoxLayout:
+            id: login_bar
+            size_hint_y: None
+            height: "50dp"
+            Button:
+                text: "Log In"
+                on_press: root.open_login_popup()
+                disabled: root.app_root.player.logged_in
+            Button:
+                text: "Register"
+                on_press: root.open_register_popup()
+                disabled: root.app_root.player.logged_in
+        ScrollView:
+            canvas.before:
+                Color:
+                    rgba: LIGHT_BLUE
+                Line:
+                    width: 1.1
+                    rectangle: self.x, self.y, self.width, self.height
+            id: scroll
+            do_scroll_x: False
+            do_scroll_y: True
+            GridLayout:
+                id: scroll_grid
+                cols: 1
+                size_hint: 1, None
+                height: self.minimum_height
+        BoxLayout:
+            canvas.before:
+                Color:
+                    rgba: LIGHT_BLUE
+                Line:
+                    width: 1.1
+                    rectangle: self.x, self.y, self.width, self.height
+            id: current_lobby_box
+            orientation: 'vertical'
+            size_hint_y: None
+            height: "350dp"
+            Label:
+                id: current_lobby_label
+                text: "Current Lobby: " + (root.selected_lobby.lobby_name if root.selected_lobby is not None else "")
+                size_hint_y: None
+                height: '50dp'
+            ScrollView:
+                id: players_scroll
+                do_scroll_x: False
+                do_scroll_y: True
+                GridLayout:
+                    id: players_scroll_grid
+                    cols: 1
+                    size_hint: 1, None
+                    height: self.minimum_height
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: '50dp'
+            Button:
+                id: leave_lobby_btn
+                text: "Leave Lobby"
+                on_press: root.leave_lobby()
+            Button:
+                id: start_game_btn
+                text: "Start Game"
+                on_press: root.start_game()
+
+
+
+<Menu>:
+    canvas:
+        Color:
+            rgba: 0.8, 0.8, 0.8, 1
+        Rectangle:
+            size: (self.size[0], int(self.size[0]/0.69))
+            pos: self.pos
+            source: 'assets/menu.jpg'
+    orientation: 'vertical'
+    padding: [100, 0, 100, 0]
+    Label:
+        id: title
+        text: "TetrisPy"
+        font_size: '100sp'
+        size_hint_y: None
+        height: '300dp'
+        color: LIGHT_BLUE
+        font_name: 'assets/font2'
+    Button:
+        id: play_singleplayer_btn
+        text: 'Play Singleplayer'
+        size_hint_y: None
+        height: '100dp'
+        on_press: root.play_singleplayer()
+        background_normal: "assets/menu_btn_normal.png"
+        background_down: "assets/menu_btn_down.png"
+        background_disabled_normal: 'assets/background_disabled_normal.png'
+    Button:
+        id: play_multiplayer_btn
+        text: 'Play Multiplayer'
+        size_hint_y: None
+        height: '100dp'
+        on_press: root.play_multiplayer()
+        disabled: True
+        background_normal: "assets/menu_btn_normal.png"
+        background_down: "assets/menu_btn_down.png"
+        background_disabled_normal: 'assets/background_disabled_normal.png'
+    Widget:
+
+
+<TetrisRoot>:
+    Menu:
+        id: main_menu
+
+
+<TetrisBlockWidget>:
+    # text: str(root.position.y) if root.position else ''
+    canvas.before:
+        Color:
+            rgba: root.occupied_by.color if root.occupied_by is not None else [.2, .2, .2, .5]
+        Rectangle:
+            pos: (self.x + root.padding/2, self.y + root.padding/2)
+            size: (self.width - root.padding, self.height - root.padding)
+
+<ThemedPopup>:
+    title_color: LIGHT_BLUE
+    title_size: '18sp'
+    title_font: 'assets/font2.ttf'
+    separator_color: [0.1, 0.1, 0.1, 1]
+    background_color: [0.1, 0.1, 0.1, 1]
+    background: "resources/dark.png"
